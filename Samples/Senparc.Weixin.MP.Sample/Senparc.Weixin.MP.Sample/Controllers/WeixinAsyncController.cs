@@ -83,7 +83,7 @@ namespace Senparc.Weixin.MP.Sample.Controllers
 
             var messageHandler = new CustomMessageHandler(Request.InputStream, postModel, 10);
 
-            messageHandler.DefaultMessageHandlerAsyncEvent = Weixin.MessageHandlers.DefaultMessageHandlerAsyncEvent.SelfSynicMethod;//没有重写的异步方法将默认尝试调用同步方法中的代码（为了偷懒）
+            messageHandler.DefaultMessageHandlerAsyncEvent = Senparc.NeuChar.MessageHandlers.DefaultMessageHandlerAsyncEvent.SelfSynicMethod;//没有重写的异步方法将默认尝试调用同步方法中的代码（为了偷懒）
 
             #region 设置消息去重
 
@@ -124,14 +124,15 @@ namespace Senparc.Weixin.MP.Sample.Controllers
             //{
             //    throw new Exception(messageHandler.RequestDocument.ToString());
             //}
-            if (messageHandler.ResponseDocument != null)
+            if (messageHandler.ResponseDocument != null && messageHandler.ResponseDocument.Root != null)
             {
                 messageHandler.ResponseDocument.Save(Path.Combine(logPath, string.Format("{0}_Response_{1}_{2}.txt", _getRandomFileName(),
                     messageHandler.ResponseMessage.ToUserName,
                     messageHandler.ResponseMessage.MsgType)));
             }
 
-            if (messageHandler.UsingEcryptMessage && messageHandler.FinalResponseDocument != null)
+            if (messageHandler.UsingEcryptMessage &&
+                messageHandler.FinalResponseDocument != null && messageHandler.FinalResponseDocument.Root != null)
             {
                 //记录加密后的响应信息
                 messageHandler.FinalResponseDocument.Save(Path.Combine(logPath, string.Format("{0}_Response_Final_{1}_{2}.txt", _getRandomFileName(),

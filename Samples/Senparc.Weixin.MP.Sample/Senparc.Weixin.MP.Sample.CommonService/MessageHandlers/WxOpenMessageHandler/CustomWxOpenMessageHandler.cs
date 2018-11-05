@@ -16,9 +16,9 @@ using Senparc.Weixin.WxOpen;
 using Senparc.Weixin.WxOpen.MessageHandlers;
 using Senparc.Weixin.WxOpen.Entities;
 using Senparc.Weixin.WxOpen.Entities.Request;
-using IRequestMessageBase = Senparc.Weixin.WxOpen.Entities.IRequestMessageBase;
-using IResponseMessageBase = Senparc.Weixin.WxOpen.Entities.IResponseMessageBase;
 using Senparc.Weixin.MP.Sample.CommonService.Utilities;
+using Senparc.NeuChar.MessageHandlers;
+using Senparc.NeuChar.Entities;
 
 #if NET45
 using System.Web.Configuration;
@@ -34,20 +34,15 @@ namespace Senparc.Weixin.MP.Sample.CommonService.WxOpenMessageHandler
     /// </summary>
     public partial class CustomWxOpenMessageHandler : WxOpenMessageHandler<CustomWxOpenMessageContext>
     {
-#if NET45
         private string appId = Config.SenparcWeixinSetting.WxOpenAppId;
         private string appSecret = Config.SenparcWeixinSetting.WxOpenAppSecret;
-#else
-        private string appId = "WxOpenAppId";
-        private string appSecret = "WxOpenAppSecret";
-#endif
 
         public CustomWxOpenMessageHandler(Stream inputStream, PostModel postModel, int maxRecordCount = 0)
             : base(inputStream, postModel, maxRecordCount)
         {
             //这里设置仅用于测试，实际开发可以在外部更全局的地方设置，
-            //比如MessageHandler<MessageContext>.GlobalWeixinContext.ExpireMinutes = 3。
-            WeixinContext.ExpireMinutes = 3;
+            //比如MessageHandler<MessageContext>.GlobalGlobalMessageContext.ExpireMinutes = 3。
+            GlobalMessageContext.ExpireMinutes = 3;
 
             if (!string.IsNullOrEmpty(postModel.AppId))
             {
@@ -109,7 +104,7 @@ namespace Senparc.Weixin.MP.Sample.CommonService.WxOpenMessageHandler
             if (contentUpper == "LINK")
             {
                 //发送客服消息
-                Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendLink(appId, WeixinOpenId, "欢迎使用 Senparc.Weixin SDK", "感谢大家的支持！\r\n\r\n盛派永远在你身边！",
+                Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendLink(appId, OpenId, "欢迎使用 Senparc.Weixin SDK", "感谢大家的支持！\r\n\r\n盛派永远在你身边！",
                     "https://weixin.senparc.com", "https://sdk.weixin.senparc.com/images/book-cover-front-small-3d-transparent.png");
             }
             else if (contentUpper == "CARD")
@@ -118,7 +113,7 @@ namespace Senparc.Weixin.MP.Sample.CommonService.WxOpenMessageHandler
                 var uploadResult = MP.AdvancedAPIs.MediaApi.UploadTemporaryMedia(appId, UploadMediaFileType.image, Server.GetMapPath("~/Images/Logo.thumb.jpg"));
 
                 //发送客服消息
-                Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendMiniProgramPage(appId, WeixinOpenId, "欢迎使用 Senparc.Weixin SDK", "pages/websocket/websocket",
+                Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendMiniProgramPage(appId, OpenId, "欢迎使用 Senparc.Weixin SDK", "pages/websocket/websocket",
                  uploadResult.media_id);
             }
             else
@@ -161,7 +156,7 @@ namespace Senparc.Weixin.MP.Sample.CommonService.WxOpenMessageHandler
                 var msg = result.ToString().Replace("\r\n", "\n");
 
                 //发送客服消息
-                Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendText(appId, WeixinOpenId, msg);
+                Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendText(appId, OpenId, msg);
 
                 //也可以使用微信公众号的接口，完美兼容：
                 //Senparc.Weixin.MP.AdvancedAPIs.CustomApi.SendText(appId, WeixinOpenId, msg);
@@ -188,8 +183,8 @@ namespace Senparc.Weixin.MP.Sample.CommonService.WxOpenMessageHandler
             //发来图片，进行处理
             Task.Factory.StartNew(async () =>
             {
-                await Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendTextAsync(appId, WeixinOpenId, "刚才您发送了这张图片：");
-                await Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendImageAsync(appId, WeixinOpenId, requestMessage.MediaId);
+                await Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendTextAsync(appId, OpenId, "刚才您发送了这张图片：");
+                await Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendImageAsync(appId, OpenId, requestMessage.MediaId);
             });
             return DefaultResponseMessage(requestMessage);
         }
@@ -204,7 +199,7 @@ namespace Senparc.Weixin.MP.Sample.CommonService.WxOpenMessageHandler
 2、发送图片，返回同样的图片
 3、发送文字“link”,返回图文链接
 4、发送文字“card”，发送小程序卡片";
-            Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendText(appId, WeixinOpenId, msg);
+            Senparc.Weixin.WxOpen.AdvancedAPIs.CustomApi.SendText(appId, OpenId, msg);
 
             return DefaultResponseMessage(requestMessage);
         }
